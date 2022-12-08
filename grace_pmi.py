@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 from sklearn import preprocessing
 import torchvision.transforms as T
 from matplotlib.ticker import MultipleLocator
-from matplotlib.colors import LinearSegmentedColormap
 
 '''
 ---------------------------------------------------------------------------------------------
