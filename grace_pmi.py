@@ -16,8 +16,8 @@ from matplotlib.colors import LinearSegmentedColormap
 ---------------------------------------------------------------------------------------------
 ---------------------------------------------------------------------------------------------
 Code trains a Mutual Information Neural Estimator (MINE-network) on each month of GRACE data.
-Returns monthly csv files with a new column for the point-wise mutual information, 
-and associated training curve for each months worth of data, as well as the saved model. 
+Returns monthly csv files with a new column for the point-wise mutual information,
+associated training curve, as well as the saved model. 
 
 File structure
 --------------
@@ -172,7 +172,7 @@ if __name__ ==  '__main__':
         root_to_save_model = 'models/'
         torch.save(model, f'{root_to_save_model}/{year}_{month}.pt')
 
-        # Plot results
+        # plot results
         fig, ax = plt.subplots(figsize=(17,5))
         rcParams['font.size'] = 14
         plt.title('Mutual Information learning curves for grace residuals using the neural estimator (MINE)', fontsize=18)
@@ -193,7 +193,7 @@ if __name__ ==  '__main__':
         plt.savefig(f'plots/{year}_{month}.pdf')
         plt.close(fig)
 
-        # Calculate PMI 
+        # calculate PMI 
         months_pmis = []
         for x, y in zip(X_scal,y_scal):
             _, _, y_shuffle = next(iter(dataloader))
