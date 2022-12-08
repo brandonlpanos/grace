@@ -125,19 +125,24 @@ def PMI(x_sample, y_sample, y_shuffle):
 if __name__ ==  '__main__':
 
     # iterate over data in months
-    months = [01,02,03,04,05,06,07,08,09,10,11,12]
+    months = ['01','02','03','04','05','06','07','08','09','10','11','12']
     for month in months:
-        month = str(month)
+        if month != '05': continue
         year = '2019'
 
-        root_path  = f'/datasets/{year}-{month}'
+        root_path  = f'datasets/{year}-{month}'
         for day in os.listdir(root_path):
             path = root_path + '/' + day
             try: df = res_file_to_df(path) # convert res file into pandas DataFrame
             except: continue # some datasets are empty, if any problems just skip        
             y = np.array(df['O-C range rate [m/s]']) # target random variable residuals 
             df2 = df.copy()
-            df2 = df2.drop(['O-C range rate [m/s]'], axis=1) # drop target variable from df
+            df2 = df2.drop( ['MJD', 
+               'frac of a day', 
+               'GPS range rate AB [m/s]', 
+               'Kband range rate [m/s]',
+               'O-C range rate [m/s]',
+               'beta [deg]'], axis=1) # drop target variable from df
             X = df2.to_numpy() # construct matrix out of remaining columns
 
         # standerdize 
@@ -149,7 +154,7 @@ if __name__ ==  '__main__':
         dataloader = torch.utils.data.DataLoader(dataset, shuffle=True)
 
         n_epoch = 10000
-        model = MINEnetwork(10,3)
+        model = MINEnetwork(5,3)
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         mi_hist = []
         for epoch in range(n_epoch):
@@ -163,7 +168,7 @@ if __name__ ==  '__main__':
             optimizer.step()
 
         # save model
-        root_to_save_model = '/models/months/'
+        root_to_save_model = 'models/'
         torch.save(model, f'{root_to_save_model}/{year}_{month}.pt')
 
         # Plot results
@@ -184,7 +189,7 @@ if __name__ ==  '__main__':
         plt.ylabel('MI', fontsize=18)
         plt.legend(loc='lower right')
         plt.tight_layout()
-        plt.savefig(f'/figs/months/{year}_{month}.pdf')
+        plt.savefig(f'plots/{year}_{month}.pdf')
         plt.close(fig)
 
         # Calculate PMI 
@@ -204,5 +209,5 @@ if __name__ ==  '__main__':
         # append new information into csv file for the month
         df3 = df.copy()
         df3['MI'] = months_pmis
-        save_new_csv = '/midata/'
+        save_new_csv = 'midata/'
         df3.to_csv(f'{save_new_csv}/{year}_{month}.csv',sep='\t')
