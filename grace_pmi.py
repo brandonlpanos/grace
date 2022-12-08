@@ -17,7 +17,7 @@ from matplotlib.colors import LinearSegmentedColormap
 ---------------------------------------------------------------------------------------------
 Code trains a Mutual Information Neural Estimator (MINE-network) on each month of GRACE data.
 Returns monthly csv files with a new column for the point-wise mutual information, 
-an associated training curve for each months worth of data, as well as the saved model. 
+and associated training curve for each months worth of data, as well as the saved model. 
 
 File structure
 --------------
@@ -28,6 +28,7 @@ File structure
 - midata
 - models
 - plots
+- grace_pmi.py
 
  PMI can take positive or negative values, but is zero if X and Y are independent. 
  Note that even though PMI may be negative or positive, its expected outcome over 
@@ -127,7 +128,7 @@ if __name__ ==  '__main__':
     # iterate over data in months
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
     for month in months:
-        if month != '05': continue
+        # if month != '05': continue
         year = '2019'
 
         root_path  = f'datasets/{year}-{month}'
