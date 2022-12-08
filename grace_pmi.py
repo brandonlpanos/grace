@@ -13,8 +13,8 @@ from matplotlib.ticker import MultipleLocator
 from matplotlib.colors import LinearSegmentedColormap
 
 '''
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 Code trains a Mutual Information Neural Estimator (MINE-network) on each month of GRACE data.
 Returns monthly csv files with a new column for the point-wise mutual information, 
 an associated training curve for each months worth of data, as well as the saved model. 
@@ -24,13 +24,16 @@ File structure
 - datasets 
     -2019-01 --> res files per day
     -2019-02 --> res files per day
-    ...
     -2019-12 --> res files per day
 - midata
 - models
 - plots
------------------------------------------------------------------------------------------------
------------------------------------------------------------------------------------------------
+
+ It can take positive or negative values, but is zero if X and Y are independent. 
+ Note that even though PMI may be negative or positive, its expected outcome over 
+ all joint events (MI) is positive. (wiki)
+---------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------
 '''
 
 
