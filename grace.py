@@ -1,25 +1,26 @@
 import os
+import torch
 import pandas 
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import rcParams
-from sklearn import preprocessing
-from matplotlib.ticker import MultipleLocator
-from matplotlib.colors import LinearSegmentedColormap
-import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+from matplotlib import rcParams
+import matplotlib.pyplot as plt
+from sklearn import preprocessing
 import torchvision.transforms as T
+from matplotlib.ticker import MultipleLocator
+from matplotlib.colors import LinearSegmentedColormap
 
 '''
-Train MINE-network on each month of GRACE data and calculates PMI for each point.
-Saves model, image of training, and new csv with added pmi column. All save names are in year-month. 
+Code trains a Mutual Information Neural Estimator (MINE-network) on each month of GRACE data.
+Returns monthly csv files with a new column for the point-wise mutual information, 
+an associated training curve for each months worth of data, as well as the saved model. 
 '''
 
 def res_file_to_df(file):
     '''
-    Converts a res file into a pandas DataFrame for a single day
+    converts a res file into a pandas DataFrame for a single day
     '''
     # header information
     columns = ['MJD', 
@@ -47,8 +48,10 @@ def res_file_to_df(file):
     df = pandas.DataFrame(data=data_array,columns=columns) # convert stack to pandas DataFrame
     return df
 
-# data loader that generates samples of joints and marginals 
 class MINEDataLoader(torch.utils.data.Dataset):
+    '''
+    data loader that generates samples of joints and marginals 
+    '''
     def __init__(self, data1, data2, n_samples):
         self.n_samples = n_samples
         self.data1 = torch.from_numpy(data1).type(torch.FloatTensor)
@@ -64,8 +67,10 @@ class MINEDataLoader(torch.utils.data.Dataset):
         y_shuffle = self.data2[np.random.randint(0, len(self.data2)-1, len(y_sample))]
         return torch.squeeze(x_sample), torch.unsqueeze(y_sample, -1), torch.unsqueeze(y_shuffle, -1)
 
-# Define Mine-network using PyTorch
 class MINEnetwork(nn.Module):
+    '''
+    MINE-network using PyTorch
+    '''
     def __init__(self, d1, dz):
         super(MINEnetwork, self).__init__()
         self.fc1 = nn.Linear(d1, dz)
@@ -83,7 +88,7 @@ class MINEnetwork(nn.Module):
 
 def PMI(x_sample, y_sample, y_shuffle):
     '''
-    Returns the pmi of a single data pair
+    returns the pmi of a single data pair
     '''
     with torch.no_grad():            
         # Calculate joint output
