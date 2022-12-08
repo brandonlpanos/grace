@@ -29,7 +29,7 @@ File structure
 - models
 - plots
 
- It can take positive or negative values, but is zero if X and Y are independent. 
+ PMI can take positive or negative values, but is zero if X and Y are independent. 
  Note that even though PMI may be negative or positive, its expected outcome over 
  all joint events (MI) is positive. (wiki)
 ---------------------------------------------------------------------------------------------
