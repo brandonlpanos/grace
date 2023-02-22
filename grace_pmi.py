@@ -55,7 +55,7 @@ def res_file_to_df(file):
                'beta [deg]']
     # collect data
     data_array = [] # empty container 
-    with open(path) as f:
+    with open(file) as f:
         lines = f.readlines()
         for i, line in enumerate(lines):
             if i < 12: continue # skip header information
@@ -127,15 +127,21 @@ if __name__ ==  '__main__':
     # iterate over data in months
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
     for month in months:
+        if month == '01': continue
+        print(month)
+        X = None 
+        y = None
+        df_month = None
         # if month != '05': continue
         year = '2019'
-
-        root_path  = f'datasets/{year}-{month}'
+        root_path  = f'/Users/brandonlpanos/Desktop/grace/datasets/{year}-{month}'
         for day in os.listdir(root_path):
             path = root_path + '/' + day
             try: df = res_file_to_df(path) # convert res file into pandas DataFrame
-            except: continue # some datasets are empty, if any problems just skip        
-            y = np.array(df['O-C range rate [m/s]']) # target random variable residuals 
+            except:
+                print(path + ' is empty') 
+                continue # some datasets are empty, if any problems just skip        
+            y_day = np.array(df['O-C range rate [m/s]']) # target random variable residuals 
             df2 = df.copy()
             df2 = df2.drop( ['MJD', 
                'frac of a day', 
@@ -143,9 +149,29 @@ if __name__ ==  '__main__':
                'Kband range rate [m/s]',
                'O-C range rate [m/s]',
                'beta [deg]'], axis=1) # drop target variable from df
-            X = df2.to_numpy() # construct matrix out of remaining columns
+            
+            try: df_month = pandas.concat([df_month, df], ignore_index=True)
+            except: 
+                print('here')
+                df_month = df 
+            
+            # concatenate x matrices
+            X_day = df2.to_numpy() # construct matrix out of remaining columns
+            try: X = np.concatenate( (X, X_day), axis=0 )
+            except: X = X_day
 
-        # standerdize 
+            # concatenate y vectors 
+            try: y = np.concatenate( (y, y_day) )
+            except: y = y_day
+
+            print(len(df_month), X.shape, y.shape)
+
+            # error catching
+            assert len(X) == len(y), f'{path} dimensions dont match'
+            # if month != '01' and X <= X_day: print(path + ' is broken and reset the dataset, matrix issue')
+            # if month != '01' and df_month <= df: print(path + ' is broken and reset the dataset, dataframe issue')
+
+        # standerdize
         X_scal = preprocessing.StandardScaler().fit_transform(X)
         y_scal = preprocessing.StandardScaler().fit_transform(y.reshape(len(y),1))
         y_scal = np.squeeze(y_scal)
@@ -168,7 +194,7 @@ if __name__ ==  '__main__':
             optimizer.step()
 
         # save model
-        root_to_save_model = 'models/'
+        root_to_save_model = '/Users/brandonlpanos/Desktop/grace/models/'
         torch.save(model, f'{root_to_save_model}/{year}_{month}.pt')
 
         # plot results
@@ -189,7 +215,7 @@ if __name__ ==  '__main__':
         plt.ylabel('MI', fontsize=18)
         plt.legend(loc='lower right')
         plt.tight_layout()
-        plt.savefig(f'plots/{year}_{month}.pdf')
+        plt.savefig(f'/Users/brandonlpanos/Desktop/grace/plots/{year}_{month}.pdf')
         plt.close(fig)
 
         # calculate PMI 
@@ -207,7 +233,7 @@ if __name__ ==  '__main__':
         months_pmis = np.array(months_pmis)
 
         # append new information into csv file for the month
-        df3 = df.copy()
-        df3['MI'] = months_pmis
-        save_new_csv = 'midata/'
-        df3.to_csv(f'{save_new_csv}/{year}_{month}.csv',sep='\t')
+        assert len(months_pmis) == len(df_month), f'{path} dimensions dont match, pmi issue'
+        df_month['MI'] = months_pmis
+        save_new_csv = '/Users/brandonlpanos/Desktop/grace/midata/'
+        df_month.to_csv(f'{save_new_csv}/{year}_{month}.csv',sep='\t')
